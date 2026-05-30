@@ -1,39 +1,122 @@
-![Integrando seu projeto React com APIs](thumbnail.png)
+# 🐳 Guia Definitivo Docker — Projeto AllBooks (Front-end)
 
-# AluraBooks
+Este documento reúne o passo a passo completo, boas práticas e comandos essenciais para dockerizar, rodar localmente e publicar no Docker Hub o container da aplicação **AllBooks** (Front-end). O foco aqui é o isolamento do ambiente de desenvolvimento utilizando containers Docker.
 
-O AluraBooks é uma loja virtual que vende livros da Casa do Código. 
-É um MVP que tá só começando e ainda tem muitas funcionalidades novas para serem desenvolvidas.
+---
 
-<img src="screencapture.png" alt="Imagem do AluraBooks" width="50%">
+## 🏗️ 1. Arquitetura do Container
+
+A aplicação é um projeto Front-end estruturado em React + TypeScript. Internamente, o servidor de desenvolvimento do React é configurado para escutar na porta `3000`. Através do Docker, isolamos todas as dependências do Node.js dentro de um ambiente seguro e controlado.
+
+---
+
+## 📦 2. Configurando o Dockerfile
+
+Para garantir um build rápido, limpo e seguro, utilizamos a seguinte estrutura no arquivo `Dockerfile` localizado na raiz do projeto:
+
+```dockerfile
+FROM node:20-alpine
+
+# Convenção de mercado para isolamento e segurança dos arquivos
+WORKDIR /app
+
+# Copia arquivos de gerenciamento de pacotes primeiro para aproveitar o cache de camadas
+COPY package.json 
+
+# Instala as dependências de forma limpa dentro do container
+RUN npm install
+
+# Copia os componentes, páginas e estilos (.tsx, .css, etc.)
+COPY . .
+
+# Inicia o servidor de desenvolvimento do React utilizando o formato Exec recomendado
+ENTRYPOINT ["npm", "start"]
+
+```
 
 
-## 🔨 Funcionalidades do projeto
+## 🔨 3. Comandos de Construção e Execução
 
-O AluraBooks começa com a página inicial já pronta, que você pode baixar e utilizar ou então... criar a sua versão baseada <a href="https://www.figma.com/file/POpX503Kobu83iGdiaICvk/React%3A-Alura-Books?node-id=119%3A3145" target="_blank">no figma</a>.
-No decorrer da formação nós vamos implementar toda a camada de comunicação com a API, inclusive a autenticação.
+### Passo 1: Construir a Imagem (Build)
+Para construir a imagem a partir do Dockerfile, etiquetá-la corretamente e definir o contexto no diretório atual, execute o comando abaixo no seu terminal:
 
-## ✔️ Técnicas e tecnologias utilizadas
+```bash
+docker build -t viniciussilvestre10/allbooks-frontend:1.0 .
+```
 
-Se liga nessa lista de tudo que usaremos nessa formação:
+## Passo 2: Rodar o Container (Run)
 
-- `React`
-- `React Hooks`
-- `TypeScript`
-- `axios`
-- `Session Storage`
-- `TSDX`
-- `NPM` (no primeiro curso nós criamos uma biblioteca e a publicamos no NPM)
-- `Github Actions`
+Para criar e iniciar o container baseado na imagem construída, expondo a aplicação para a sua máquina física, utilize o comando:
 
-E muito mais!
+```bash
+docker run -d -p 8080:3000 --name allbooks-front viniciussilvestre10/allbooks-frontend:1.0
+```
 
-## 🛠️ Abrir e rodar o projeto
+### 🔍 Entendendo os Parâmetros (Mapeamento de Portas)
 
-Para abrir e rodar o projeto, execute `npm i` para instalar as dependências e `npm start` para inicar o projeto.
+- **`-d`**: Roda o container em modo *detached* (segundo plano), liberando o terminal.
+- **`-p 8080:3000`**: Faz o mapeamento de portas (**Máquina Física : Dentro do Container**). Toda requisição que chegar na porta **8080** do seu computador será direcionada para a porta **3000** da aplicação React dentro do container.
+- **`--name allbooks-front`**: Nomeia o container para facilitar o gerenciamento.
 
-Depois, acesse <a href="http://localhost:3000/">http://localhost:3000/</a> no seu navegador.
+---
 
-## 📚 Mais informações do curso
+## 🌐 4. Acessando a Aplicação
 
-O AluraBooks é o projeto utilizado durante toda a formação, e você pode navegar entre as branchs para encontrar o momento específico que está buscando.
+Com o container em execução, abra o seu navegador de preferência e acesse o endereço:
+
+`http://localhost:8080`
+
+---
+
+## 🚀 5. Publicando a Imagem no Docker Hub (Push)
+
+Após validar o funcionamento do container localmente, a imagem foi enviada para o repositório remoto no Docker Hub para garantir a portabilidade do projeto.
+
+### Autenticação no terminal
+
+```bash
+docker login
+```
+
+### Envio da imagem (Push)
+
+```bash
+docker push viniciussilvestre10/allbooks-frontend:1.0
+```
+
+**Status atual:** Imagem publicada com sucesso e pronta para ser executada em qualquer máquina com Docker instalado! 
+
+---
+
+## 🛠️ 6. Cheat Sheet (Comandos de Sobrevivência)
+
+### Verificar se o container está rodando e checar as portas
+
+```bash
+docker ps
+```
+
+### Parar o container de maneira limpa (repassando os sinais do SO corretamente)
+
+```bash
+docker stop allbooks
+```
+
+### Iniciar novamente o container que foi parado
+
+```bash
+docker start allbooks
+```
+
+### Remover o container para liberar espaço 
+
+```bash
+docker rm  allbooks
+```
+
+### Listar as imagens Docker armazenadas no disco rígido do computador
+
+```bash
+docker images ls
+```
+
