@@ -15,7 +15,7 @@ A aplicação é um projeto Front-end estruturado em React + TypeScript. Interna
 Para garantir um build rápido, limpo e seguro, utilizamos a seguinte estrutura no arquivo `Dockerfile` localizado na raiz do projeto:
 
 ```dockerfile
-FROM node:20-alpine
+FROM node:20
 
 # Convenção de mercado para isolamento e segurança dos arquivos
 WORKDIR /app
